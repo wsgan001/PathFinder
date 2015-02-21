@@ -1,0 +1,19 @@
+Characters Used:
+  Uppercase oh ("O") = Open Space
+  Uppercase ex ("X") = Blocked Space
+  Uppercase ess ("S") = Start Position
+  Uppercase ef ("F") = Ending Position
+  
+Map Layout:
+  Upper Left Corner is Origin (0,0)
+  Lower Left Corner is (Max, Max)
+  All Characters are delimited by spaces
+  
+Example:
+
+S O X 
+X O X
+X O F
+
+S is at 0,0, F is at 2,2
+ 
