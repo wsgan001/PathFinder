@@ -7,8 +7,11 @@ package src;
 import world.Robot;
 import world.World;
 import java.awt.Point;
+import java.lang.Double;
+import java.lang.Integer;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class myRobot extends Robot {
@@ -39,9 +42,66 @@ public class myRobot extends Robot {
         }
     }
 
-    public ArrayList<Node> run_a_star( ArrayList<Node> graph ) {
-        System.out.println("running A* algo to find path");
-        return new ArrayList<Node>();
+    public ArrayList<Node> run_a_star(Node start, Node goal) {
+        ArrayList<Node> closed_set = new ArrayList<Node>();
+        ArrayList<Node> open_set = new ArrayList<Node>();
+        HashMap<Node, Node> came_from = new HashMap<Node, Node>();
+
+        open_set.add(start);
+
+        HashMap<Node, Integer> g_scores = new HashMap<Node, Integer>();
+        g_scores.put(start, 0.0);
+
+        HashMap<Node, Integer> f_scores = new HashMap<Node, Integer>();
+        f_scores.put(start, g_scores.get(start) + manhattan_distance(start, goal)); // CHECK NAME
+
+        while (!open_set.isEmpty()) {
+
+            Node current = open_set.get(0);
+
+            for (int i = 0; i < open_set.size(); i++) {
+                if (f_scores.get(open_set.get(i)) < f_scores.get(current)) {
+                    current = open_set.get(i);
+                }
+            }
+
+            if (current.get_symbol() == "F") {
+                return reconstruct_path(came_from, goal);
+            }
+
+            open_set.remove(current);
+            closed_set.add(current);
+
+            for (Node n : current.get_neighbors()) {    // CHECK NAME
+                if (closed_set.contains(n)) {
+                    continue;
+                }
+
+                int tentative_g_score = g_scores.get(current) + 1;
+
+                if (!open_set.contains(n) || tentative_g_score < g_scores.get(n)) {
+                    came_from.put(n, current);
+                    g_scores.put(n, tentative_g_score);
+                    f_scores.put(n, g_scores.get(n) + manhattan_distance(n, goal)); // CHECK NAME
+                    if (!open_set.contains(n)) {
+                        if (!n.get_symbol == "X") { // CHECK NAME
+                            open_set.add(n);
+                        }
+                    }
+                }
+            }
+
+        }
+        return null;
+    }
+
+    public ArrayList<Node> reconstruct_path(HashMap<Node, Node> came_from, Node current) {
+        ArrayList<Node> total_path = new ArrayList<Node>();
+        while (came_from.containsKey(current)) {
+            current = came_from.get(current);
+            total_path.add(current);
+        }
+        return total_path;
     }
 
     public ArrayList<Node> construct_graph() {
