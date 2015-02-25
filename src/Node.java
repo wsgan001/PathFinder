@@ -55,4 +55,7 @@ public class Node {
         return true;
     }
 
+    public static int manhattan_distance (Node a, Node b) {
+        return Math.abs(a.get_position().x - b.get_position().x) + Math.abs(a.get_position().y - b.get_position().y);
+    }
 }
