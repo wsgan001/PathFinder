@@ -7,9 +7,7 @@ package src;
 import world.Robot;
 import world.World;
 import java.awt.Point;
-import java.lang.Double;
 import java.lang.Integer;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -37,8 +35,26 @@ public class myRobot extends Robot {
         else {
             System.out.println("Run the certian pathfinder");
             ArrayList<Node> graph = this.construct_graph();
-            ArrayList<Node> path = this.run_a_star(graph);
-            this.execute_moves(path);
+            Node start = null;
+            Node end = null;
+
+            for (Node n : graph) {
+                if (n != null && n.get_symbol().equals("S")) {
+                    start = n;
+                }
+                else if (n != null && n.get_symbol().equals("F")) {
+                    end  = n;
+                }
+            }
+
+            ArrayList<Node> path = this.run_a_star(start, end);
+            if (path == null) {
+                System.out.println("we did something dumbbbb");
+            }
+            else {
+                this.execute_moves(path);
+            }
+            System.out.println();
         }
     }
 
@@ -50,10 +66,10 @@ public class myRobot extends Robot {
         open_set.add(start);
 
         HashMap<Node, Integer> g_scores = new HashMap<Node, Integer>();
-        g_scores.put(start, 0.0);
+        g_scores.put(start, 0);
 
         HashMap<Node, Integer> f_scores = new HashMap<Node, Integer>();
-        f_scores.put(start, g_scores.get(start) + manhattan_distance(start, goal)); // CHECK NAME
+        f_scores.put(start, g_scores.get(start) + Node.manhattan_distance(start, goal)); // CHECK NAME
 
         while (!open_set.isEmpty()) {
 
@@ -65,7 +81,7 @@ public class myRobot extends Robot {
                 }
             }
 
-            if (current.get_symbol() == "F") {
+            if (current.get_symbol().equals("F")) {
                 return reconstruct_path(came_from, goal);
             }
 
@@ -82,9 +98,9 @@ public class myRobot extends Robot {
                 if (!open_set.contains(n) || tentative_g_score < g_scores.get(n)) {
                     came_from.put(n, current);
                     g_scores.put(n, tentative_g_score);
-                    f_scores.put(n, g_scores.get(n) + manhattan_distance(n, goal)); // CHECK NAME
+                    f_scores.put(n, g_scores.get(n) + Node.manhattan_distance(n, goal)); // CHECK NAME
                     if (!open_set.contains(n)) {
-                        if (!n.get_symbol == "X") { // CHECK NAME
+                        if (!n.get_symbol().equals("X")) { // CHECK NAME
                             open_set.add(n);
                         }
                     }
@@ -97,6 +113,7 @@ public class myRobot extends Robot {
 
     public ArrayList<Node> reconstruct_path(HashMap<Node, Node> came_from, Node current) {
         ArrayList<Node> total_path = new ArrayList<Node>();
+        total_path.add(current);
         while (came_from.containsKey(current)) {
             current = came_from.get(current);
             total_path.add(current);
@@ -106,10 +123,10 @@ public class myRobot extends Robot {
 
     public ArrayList<Node> construct_graph() {
         ArrayList<Node> graph = new ArrayList<Node>();
-        Node[][] temp = new Node[this.numCols][this.numRows];
+        Node[][] temp = new Node[this.numRows][this.numCols];
 
-        for (int i = 0; i < this.numCols; i++) {
-            for (int j = 0; j < this.numRows; j++) {
+        for (int i = 0; i < this.numRows; i++) {
+            for (int j = 0; j < this.numCols; j++) {
                 Point pt = new Point(i,j);
                 String current_obj = this.pingMap(pt);
                 Node n = new Node(current_obj, pt);
@@ -141,7 +158,7 @@ public class myRobot extends Robot {
         // once a path has been determined, mosey down the path
         // Method assumes path is backwards (i.e index of 'F' is 0, index of 'S' is path.size() -1)
         int len = path.size() -1;
-        for (int i = len; i >= 0; i++) {
+        for (int i = len; i >= 0; i--) {
             Point pt = path.get(i).get_position();
             this.move(pt);
         }
@@ -151,7 +168,7 @@ public class myRobot extends Robot {
 
         try {
 
-            World myWorld = new World("maps/myMap.txt", false);
+            World myWorld = new World("maps/map2.txt", false);
 
             System.out.println(myWorld.getStartPos());
 
