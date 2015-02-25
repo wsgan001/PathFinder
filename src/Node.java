@@ -58,4 +58,16 @@ public class Node {
     public static int manhattan_distance (Node a, Node b) {
         return Math.abs(a.get_position().x - b.get_position().x) + Math.abs(a.get_position().y - b.get_position().y);
     }
+
+
+    public static int euclidian_distance (Node a, Node b) {
+        double dy = a.get_position().y - b.get_position().y;
+        double dx = a.get_position().x - b.get_position().x;
+        double res = dx*dx + dy*dy;
+        return (int) Math.round(Math.sqrt(res));
+    }
+
+    public static int manhat_euclid_avg(Node a, Node b) {
+        return (int) Math.round(euclidian_distance(a,b) + manhattan_distance(a,b) / 2.0);
+    }
 }
