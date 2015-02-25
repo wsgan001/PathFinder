@@ -17,6 +17,18 @@ public class Node {
         this.neighbors = new ArrayList<Node>();
     }
 
+    public String get_symbol() {
+        return this.symbol;
+    }
+
+    public Point get_position() {
+        return this.position;
+    }
+
+    public ArrayList<Node> get_neighbors() {
+        return this.neighbors;
+    }
+
     public boolean contains(Node n) {
         return this.neighbors.contains(n);
     }

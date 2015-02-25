@@ -33,19 +33,15 @@ public class myRobot extends Robot {
 
         else {
             System.out.println("Run the certian pathfinder");
-            this.run_a_star();
-            this.move(new Point(1,1));
-            this.move(new Point(2,0));
-
+            ArrayList<Node> graph = this.construct_graph();
+            ArrayList<Node> path = this.run_a_star(graph);
+            this.execute_moves(path);
         }
-
-
     }
 
-    public void run_a_star() {
+    public ArrayList<Node> run_a_star( ArrayList<Node> graph ) {
         System.out.println("running A* algo to find path");
-        ArrayList<Node> graph = construct_graph();
-        System.out.println("Constructed Graph");
+        return new ArrayList<Node>();
     }
 
     public ArrayList<Node> construct_graph() {
@@ -81,7 +77,15 @@ public class myRobot extends Robot {
         return graph;
     }
 
-
+    public void execute_moves (ArrayList<Node> path) {
+        // once a path has been determined, mosey down the path
+        // Method assumes path is backwards (i.e index of 'F' is 0, index of 'S' is path.size() -1)
+        int len = path.size() -1;
+        for (int i = len; i >= 0; i++) {
+            Point pt = path.get(i).get_position();
+            this.move(pt);
+        }
+    }
 
     public static void main (String[] args) {
 
