@@ -24,6 +24,7 @@ public class myRobot extends Robot {
         this.numCols = numCols;
         this.endPos = endPos;
         this.is_uncertian = uncert_flag;
+
     }
 
     public void travelToDestination() {

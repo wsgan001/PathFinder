@@ -37,7 +37,7 @@ public class uncertainRobot extends Robot {
 
     public void run_random_trace() {
         this.init_grid();
-        while (!this.getPosition().equals(this.endPos) && this.getNumMoves() > this.max_number_of_moves) {
+        while (!this.getPosition().equals(this.endPos) && this.getNumMoves() < this.max_number_of_moves) {
             this.move_towards_destination();
         }
     }
@@ -62,31 +62,38 @@ public class uncertainRobot extends Robot {
 
         Point current_pos = this.getPosition();
 
-        while (!this.getPosition().equals(current_pos)) {
+        while (this.getPosition().equals(current_pos)) {
             Node next_move = this.get_next(possible_moves);
-
-            this.move(next_move.get_position());
+            Point next = next_move.get_position();
+            if (next_move == null) {
+                return;
+            }
+            Node grid_node = this.grid[next.x][next.y];
+            if (grid_node != null && grid_node.get_symbol().equals("X")) {
+                continue;
+            } else {
+                this.move(next_move.get_position());
+            }
 
             if (this.getPosition().equals(current_pos)) {   // Hit an obstacle
-                this.grid[this.getX()][this.getY()] = new Node("X", next_move);
+                this.grid[this.getX()][this.getY()] = new Node("X", next_move.get_position());
                 possible_moves.remove(next_move);
             } else {
-                this.grid[this.getX()][this.getY()] = new Node("O", next_move);
-
-                if (Node.euclidian_distance(end, next_move) > Node.euclidian_distance(end, current_pos)) {
+                this.grid[this.getX()][this.getY()] = new Node("O", next_move.get_position());
+                System.out.print("Moved To: ");
+                System.out.println(next_move.get_position());
+                if (Node.manhattan_distance(end, next_move) > Node.manhattan_distance(end, new Node("",current_pos))) {
+                    System.out.println("moved farther away");
                     this.grid[this.getX()][this.getY()] = new Node("X", current_pos);
                 }
             }
-
+            if (this.endPos.equals(this.getPosition())) {
+                return;
+            }
         }
-
-        if (this.endPos.equals(this.getPosition())) {
-            return;
-        }
-
     }
 
-    public static Node get_next(ArrayList<Node> possible_moves) {
+    public Node get_next(ArrayList<Node> possible_moves) {
         Node end = new Node("O", this.endPos);
 
         if (!possible_moves.isEmpty()) {
@@ -94,7 +101,7 @@ public class uncertainRobot extends Robot {
             Node next_move = possible_moves.get(0);
 
             for (int i = 1; i < possible_moves.size(); i++) {
-                if (Node.euclidian_distance(end, possible_moves.get(i)) < Node.euclidian_distance(end, next_move.get_position())) {
+                if (Node.manhattan_distance(end, possible_moves.get(i)) < Node.manhattan_distance(end, next_move)) {
                     next_move = possible_moves.get(i);
                 }
             }
@@ -106,14 +113,19 @@ public class uncertainRobot extends Robot {
     public ArrayList<Node> ping_layer() {
         Point curr = this.getPosition();
         ArrayList<Node> possible_moves = new ArrayList<Node>();
-        for (int i = curr.x-1; i < curr.x + 1; i++) {
-            for (int j = curr.y - 1; i < curr.y + 1; j ++) {
-                if (i < 0 || j < 0 || i >= this.numCols || j >= numRows) {
+        for (int i = curr.x-1; i <= curr.x+1; i++) {
+            for (int j = curr.y-1; j <= curr.y+1; j++) {
+                if (i < 0 || j < 0 || i >= this.numRows || j >= this.numCols) {
                     continue;
                 }
-                Point next = new Point(i,j);
-                String val = this.pingMap(next);
-                possible_moves.add(new Node(val, next));
+                else if (i == curr.x && j == curr.y) {
+                    continue;
+                }
+                else {
+                    Point next = new Point(i, j);
+                    String val = this.pingMap(next);
+                    possible_moves.add(new Node(val, next));
+                }
 
             }
         }
@@ -124,6 +136,7 @@ public class uncertainRobot extends Robot {
 
         if (this.is_uncertian) {
             System.out.println("Run uncertian Pathfinder");
+            this.run_random_trace();
         }
 
         else {
@@ -264,23 +277,12 @@ public class uncertainRobot extends Robot {
 
             World myWorld = new World("maps/map2.txt", false);
 
-            System.out.println(myWorld.getStartPos());
-
-            System.out.println(myWorld.getEndPos());
-
-            System.out.println(myWorld.numCols());
-
-            System.out.println(myWorld.numRows());
-
-            myRobot robo = new myRobot(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), false);
+            uncertainRobot robo = new uncertainRobot(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), false);
 
             robo.addToWorld(myWorld);
 
             robo.travelToDestination();
 
-            System.out.println("Went to location");
-
-            System.out.println(robo.pingMap(new Point(4,4)));
         }
 
         catch (Exception e) {
