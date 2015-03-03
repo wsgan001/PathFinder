@@ -32,7 +32,7 @@ public class uncertainRobot extends Robot {
 
     public int get_max_moves() {
         int ceil = this.numRows*this.numCols;
-        return ceil > 20 ? ceil/2 : 20;
+        return (ceil > 20) ? ceil*2 : 20;
     }
 
     public void run_random_trace() {
@@ -275,7 +275,7 @@ public class uncertainRobot extends Robot {
 
         try {
 
-            World myWorld = new World("maps/map2.txt", false);
+            World myWorld = new World("maps/U_Map.txt", false);
 
             uncertainRobot robo = new uncertainRobot(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), false);
 
