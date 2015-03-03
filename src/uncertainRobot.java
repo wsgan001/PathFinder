@@ -64,12 +64,13 @@ public class uncertainRobot extends Robot {
 
         while (this.getPosition().equals(current_pos)) {
             Node next_move = this.get_next(possible_moves);
-            Point next = next_move.get_position();
             if (next_move == null) {
                 return;
             }
+            Point next = next_move.get_position();
             Node grid_node = this.grid[next.x][next.y];
             if (grid_node != null && grid_node.get_symbol().equals("X")) {
+                possible_moves.remove(next_move);
                 continue;
             } else {
                 this.move(next_move.get_position());
@@ -275,9 +276,9 @@ public class uncertainRobot extends Robot {
 
         try {
 
-            World myWorld = new World("maps/U_Map.txt", false);
+            World myWorld = new World("maps/L_Map.txt", false);
 
-            uncertainRobot robo = new uncertainRobot(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), false);
+            uncertainRobot robo = new uncertainRobot(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), true);
 
             robo.addToWorld(myWorld);
 
