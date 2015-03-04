@@ -31,8 +31,8 @@ public class uncertainRobot extends Robot {
     }
 
     public int get_max_moves() {
-        int ceil = this.numRows*this.numCols;
-        return (ceil > 20) ? ceil*2 : 20;
+        int ceil = this.numRows*this.numCols*2;
+        return (ceil > 20) ? ceil : 20;
     }
 
     public void run_random_trace() {
@@ -77,15 +77,18 @@ public class uncertainRobot extends Robot {
             }
 
             if (this.getPosition().equals(current_pos)) {   // Hit an obstacle
-                this.grid[this.getX()][this.getY()] = new Node("X", next_move.get_position());
+                this.grid[next.x][next.y] = new Node("X", next_move.get_position());
                 possible_moves.remove(next_move);
             } else {
                 this.grid[this.getX()][this.getY()] = new Node("O", next_move.get_position());
                 System.out.print("Moved To: ");
                 System.out.println(next_move.get_position());
-                if (Node.manhattan_distance(end, next_move) > Node.manhattan_distance(end, new Node("",current_pos))) {
-                    System.out.println("moved farther away");
-                    this.grid[this.getX()][this.getY()] = new Node("X", current_pos);
+                if (Node.manhattan_distance(end, next_move) >= Node.manhattan_distance(end, new Node("",current_pos))) {
+                    System.out.println("Moved farther away, or did not move any closer");
+                    // in this context, the current position is the last position the robot encountered
+                    // since we have moved location after current pos was declared
+                    // yay variable names
+                    this.grid[current_pos.x][current_pos.y] = new Node("X", current_pos);
                 }
             }
             if (this.endPos.equals(this.getPosition())) {
@@ -156,6 +159,7 @@ public class uncertainRobot extends Robot {
             }
 
             ArrayList<Node> path = this.run_a_star(start, end);
+            System.out.println("just for a breakpoint");
             if (path == null) {
                 System.out.println("we did something dumbbbb");
             }
@@ -267,8 +271,10 @@ public class uncertainRobot extends Robot {
         // Method assumes path is backwards (i.e index of 'F' is 0, index of 'S' is path.size() -1)
         int len = path.size() -1;
         for (int i = len; i >= 0; i--) {
-            Point pt = path.get(i).get_position();
-            this.move(pt);
+            if (!path.get(i).get_symbol().equals("S")) {
+                Point pt = path.get(i).get_position();
+                this.move(pt);
+            }
         }
     }
 
@@ -276,9 +282,9 @@ public class uncertainRobot extends Robot {
 
         try {
 
-            World myWorld = new World("maps/L_Map.txt", false);
+            World myWorld = new World("maps/U_Map.txt", false);
 
-            uncertainRobot robo = new uncertainRobot(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), true);
+            uncertainRobot robo = new uncertainRobot(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), false);
 
             robo.addToWorld(myWorld);
 
