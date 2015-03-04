@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Stack;
 
 
-public class uncertainRobot extends Robot {
+public class uncertainRobot2 extends Robot {
 
     private int numRows;
     private  int numCols;
@@ -20,7 +20,7 @@ public class uncertainRobot extends Robot {
     private int max_number_of_moves;
 
 
-    public uncertainRobot(int numCols, int numRows, Point endPos, boolean uncert_flag) {
+    public uncertainRobot2(int numCols, int numRows, Point endPos, boolean uncert_flag) {
         this.numRows = numRows;
         this.numCols = numCols;
         this.endPos = endPos;
@@ -31,8 +31,8 @@ public class uncertainRobot extends Robot {
     }
 
     public int get_max_moves() {
-        int ceil = this.numRows*this.numCols*2;
-        return (ceil > 20) ? ceil : 20;
+        int ceil = this.numRows*this.numCols;
+        return (ceil > 20) ? ceil*2 : 20;
     }
 
     public void run_random_trace() {
@@ -63,7 +63,7 @@ public class uncertainRobot extends Robot {
         Node fake_end = new Node("", this.endPos);
         int current_shortest_distance = Node.manhattan_distance(start, fake_end);
         for (int i = 0; i < subgraph.size(); i++) {
-            if (subgraph.get(i).get_symbol().equals("O")) {
+            if (subgraph.get(i).get_symbol().equals("O") || subgraph.get(i).get_symbol().equals("F")) {
                 if (current_shortest_distance > Node.manhattan_distance(subgraph.get(i), fake_end)) {
                     current_shortest_distance = Node.manhattan_distance(subgraph.get(i), fake_end);
                     end = subgraph.get(i);
@@ -115,18 +115,15 @@ public class uncertainRobot extends Robot {
             }
 
             if (this.getPosition().equals(current_pos)) {   // Hit an obstacle
-                this.grid[next.x][next.y] = new Node("X", next_move.get_position());
+                this.grid[this.getX()][this.getY()] = new Node("X", next_move.get_position());
                 possible_moves.remove(next_move);
             } else {
                 this.grid[this.getX()][this.getY()] = new Node("O", next_move.get_position());
                 System.out.print("Moved To: ");
                 System.out.println(next_move.get_position());
-                if (Node.manhattan_distance(end, next_move) >= Node.manhattan_distance(end, new Node("",current_pos))) {
-                    System.out.println("Moved farther away, or did not move any closer");
-                    // in this context, the current position is the last position the robot encountered
-                    // since we have moved location after current pos was declared
-                    // yay variable names
-                    this.grid[current_pos.x][current_pos.y] = new Node("X", current_pos);
+                if (Node.manhattan_distance(end, next_move) > Node.manhattan_distance(end, new Node("",current_pos))) {
+                    System.out.println("moved farther away");
+                    this.grid[this.getX()][this.getY()] = new Node("X", current_pos);
                 }
             }
             if (this.endPos.equals(this.getPosition())) {
@@ -206,7 +203,8 @@ public class uncertainRobot extends Robot {
 
         if (this.is_uncertian) {
             System.out.println("Run uncertian Pathfinder");
-            this.run_random_trace();
+//            this.run_random_trace();
+            this.run_layered_trace();
         }
 
         else {
@@ -225,7 +223,6 @@ public class uncertainRobot extends Robot {
             }
 
             ArrayList<Node> path = this.run_a_star(start, end);
-            System.out.println("just for a breakpoint");
             if (path == null) {
                 System.out.println("we did something dumbbbb");
             }
@@ -375,18 +372,11 @@ public class uncertainRobot extends Robot {
         // Method assumes path is backwards (i.e index of 'F' is 0, index of 'S' is path.size() -1)
         int len = path.size()-2;
         for (int i = len; i >= 0; i--) {
-<<<<<<< HEAD
-            if (!path.get(i).get_symbol().equals("S")) {
-                Point pt = path.get(i).get_position();
-                this.move(pt);
-            }
-=======
 
             Point pt = path.get(i).get_position();
             System.out.print("Moved: ");
             System.out.println(pt);
             this.move(pt);
->>>>>>> branch2
         }
     }
 
