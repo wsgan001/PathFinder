@@ -50,34 +50,36 @@ public class uncertainRobot2 extends Robot {
     }
 
     public void move_towards_destination_layered() {
-        Node[][] subgrid = this.ping_layer_2();
-        Node start = null;
-        Node end = null;
-        ArrayList<Node> subgraph = construct_subgraph(subgrid);
-        for (Node n : subgraph) {
-            if (this.getPosition().equals(n.get_position())) {
-                start = n;
-            }
-        }
 
-        Node fake_end = new Node("", this.endPos);
-        int current_shortest_distance = Node.manhattan_distance(start, fake_end);
-        for (int i = 0; i < subgraph.size(); i++) {
-            if (subgraph.get(i).get_symbol().equals("O") || subgraph.get(i).get_symbol().equals("F")) {
-                if (current_shortest_distance > Node.manhattan_distance(subgraph.get(i), fake_end)) {
-                    current_shortest_distance = Node.manhattan_distance(subgraph.get(i), fake_end);
-                    end = subgraph.get(i);
+        int radius = 2;
+        ArrayList<Node> path = null;
+        do {
+            Node[][] subgrid = this.ping_layer_radius(radius);
+            Node start = null;
+            Node end = null;
+            ArrayList<Node> subgraph = construct_subgraph(subgrid);
+            for (Node n : subgraph) {
+                if (this.getPosition().equals(n.get_position())) {
+                    start = n;
                 }
             }
-        }
 
-        ArrayList<Node> path = run_a_star(start, end);
+            Node fake_end = new Node("", this.endPos);
+            int current_shortest_distance = Node.manhattan_distance(start, fake_end);
+            for (int i = 0; i < subgraph.size(); i++) {
+                if (subgraph.get(i).get_symbol().equals("O") || subgraph.get(i).get_symbol().equals("F")) {
+                    if (current_shortest_distance > Node.manhattan_distance(subgraph.get(i), fake_end)) {
+                        current_shortest_distance = Node.manhattan_distance(subgraph.get(i), fake_end);
+                        end = subgraph.get(i);
+                    }
+                }
+            }
 
-        if (path == null) {
-            System.out.println("Path is null!");
-        }
+            path = run_a_star(start, end);
+            radius += 2;
+        } while (path == null);
 
-        else this.execute_moves(path);
+        this.execute_moves(path);
     }
 
     public void init_grid() {
@@ -171,19 +173,19 @@ public class uncertainRobot2 extends Robot {
         return possible_moves;
     }
 
-    public Node[][] ping_layer_2() {
+    public Node[][] ping_layer_radius(int r /* r stands for radius =) */) {
         Point curr = this.getPosition();
-        int minx = (curr.x-2 >= 0) ? curr.x-2 : 0;
-        int miny = (curr.y-2 >= 0) ? curr.y-2 : 0;
-        int maxx = (curr.x+2 < this.numRows ) ? curr.x+2 : this.numRows-1;
-        int maxy = (curr.y+2 < this.numCols ) ?  curr.y+2 : this.numCols-1;
+        int minx = (curr.x-r >= 0) ? curr.x-r : 0;
+        int miny = (curr.y-r >= 0) ? curr.y-r : 0;
+        int maxx = (curr.x+r < this.numRows ) ? curr.x+r : this.numRows-1;
+        int maxy = (curr.y+r < this.numCols ) ?  curr.y+r : this.numCols-1;
         int relx = maxx-minx+1;
         int rely = maxy-miny+1;
         Node[][] subgrid = new Node[relx][rely];
 
         ArrayList<Node> possible_moves = new ArrayList<Node>();
-        for (int i = curr.x-2; i <= curr.x+2; i++) {
-            for (int j = curr.y-2; j <= curr.y+2; j++) {
+        for (int i = curr.x-r; i <= curr.x+r; i++) {
+            for (int j = curr.y-r; j <= curr.y+r; j++) {
                 if (i < 0 || j < 0 || i >= this.numRows || j >= this.numCols) {
                     continue;
                 }
@@ -384,7 +386,7 @@ public class uncertainRobot2 extends Robot {
 
         try {
 
-            World myWorld = new World("maps/map2.txt", false);
+            World myWorld = new World("maps/L_map.txt", false);
 
             src.uncertainRobot2 robo = new src.uncertainRobot2(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), true);
 
