@@ -375,18 +375,11 @@ public class uncertainRobot extends Robot {
         // Method assumes path is backwards (i.e index of 'F' is 0, index of 'S' is path.size() -1)
         int len = path.size()-2;
         for (int i = len; i >= 0; i--) {
-<<<<<<< HEAD
-            if (!path.get(i).get_symbol().equals("S")) {
-                Point pt = path.get(i).get_position();
-                this.move(pt);
-            }
-=======
 
             Point pt = path.get(i).get_position();
             System.out.print("Moved: ");
             System.out.println(pt);
             this.move(pt);
->>>>>>> branch2
         }
     }
 
