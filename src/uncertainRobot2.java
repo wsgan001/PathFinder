@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Stack;
 
 
-public class uncertainRobot extends Robot {
+public class uncertainRobot2 extends Robot {
 
     private int numRows;
     private  int numCols;
@@ -20,7 +20,7 @@ public class uncertainRobot extends Robot {
     private int max_number_of_moves;
 
 
-    public uncertainRobot(int numCols, int numRows, Point endPos, boolean uncert_flag) {
+    public uncertainRobot2(int numCols, int numRows, Point endPos, boolean uncert_flag) {
         this.numRows = numRows;
         this.numCols = numCols;
         this.endPos = endPos;
@@ -63,7 +63,7 @@ public class uncertainRobot extends Robot {
         Node fake_end = new Node("", this.endPos);
         int current_shortest_distance = Node.manhattan_distance(start, fake_end);
         for (int i = 0; i < subgraph.size(); i++) {
-            if (subgraph.get(i).get_symbol().equals("O")) {
+            if (subgraph.get(i).get_symbol().equals("O") || subgraph.get(i).get_symbol().equals("F")) {
                 if (current_shortest_distance > Node.manhattan_distance(subgraph.get(i), fake_end)) {
                     current_shortest_distance = Node.manhattan_distance(subgraph.get(i), fake_end);
                     end = subgraph.get(i);
@@ -203,7 +203,8 @@ public class uncertainRobot extends Robot {
 
         if (this.is_uncertian) {
             System.out.println("Run uncertian Pathfinder");
-            this.run_random_trace();
+//            this.run_random_trace();
+            this.run_layered_trace();
         }
 
         else {
