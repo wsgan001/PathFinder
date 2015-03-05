@@ -1,3 +1,9 @@
+/*
+
+Robot that a best first approach to deal with uncertainty
+
+ */
+
 package src;
 
 import world.Robot;
@@ -6,7 +12,6 @@ import java.awt.Point;
 import java.lang.Integer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Stack;
 
 
 public class uncertainRobot extends Robot {
@@ -15,7 +20,6 @@ public class uncertainRobot extends Robot {
     private  int numCols;
     private Point endPos;
     private boolean is_uncertian;
-    private Stack<Node> stack;
     private Node[][] grid;
     private int max_number_of_moves;
 
@@ -25,7 +29,6 @@ public class uncertainRobot extends Robot {
         this.numCols = numCols;
         this.endPos = endPos;
         this.is_uncertian = uncert_flag;
-        this.stack = new Stack<Node>();
         this.grid = new Node[this.numRows][this.numCols];
         this.max_number_of_moves = this.get_max_moves();
     }
@@ -40,44 +43,6 @@ public class uncertainRobot extends Robot {
         while (!this.getPosition().equals(this.endPos) && this.getNumMoves() < this.max_number_of_moves) {
             this.move_towards_destination();
         }
-    }
-
-    public void run_layered_trace() {
-        this.init_grid();
-        while (!this.getPosition().equals(this.endPos) && this.getNumMoves() < this.max_number_of_moves) {
-            this.move_towards_destination_layered();
-        }
-    }
-
-    public void move_towards_destination_layered() {
-        Node[][] subgrid = this.ping_layer_2();
-        Node start = null;
-        Node end = null;
-        ArrayList<Node> subgraph = construct_subgraph(subgrid);
-        for (Node n : subgraph) {
-            if (this.getPosition().equals(n.get_position())) {
-                start = n;
-            }
-        }
-
-        Node fake_end = new Node("", this.endPos);
-        int current_shortest_distance = Node.manhattan_distance(start, fake_end);
-        for (int i = 0; i < subgraph.size(); i++) {
-            if (subgraph.get(i).get_symbol().equals("O")) {
-                if (current_shortest_distance > Node.manhattan_distance(subgraph.get(i), fake_end)) {
-                    current_shortest_distance = Node.manhattan_distance(subgraph.get(i), fake_end);
-                    end = subgraph.get(i);
-                }
-            }
-        }
-
-        ArrayList<Node> path = run_a_star(start, end);
-
-        if (path == null) {
-            System.out.println("Path is null!");
-        }
-
-        else this.execute_moves(path);
     }
 
     public void init_grid() {
@@ -174,43 +139,15 @@ public class uncertainRobot extends Robot {
         return possible_moves;
     }
 
-    public Node[][] ping_layer_2() {
-        Point curr = this.getPosition();
-        int minx = (curr.x-2 >= 0) ? curr.x-2 : 0;
-        int miny = (curr.y-2 >= 0) ? curr.y-2 : 0;
-        int maxx = (curr.x+2 < this.numRows ) ? curr.x+2 : this.numRows-1;
-        int maxy = (curr.y+2 < this.numCols ) ?  curr.y+2 : this.numCols-1;
-        int relx = maxx-minx+1;
-        int rely = maxy-miny+1;
-        Node[][] subgrid = new Node[relx][rely];
-
-        ArrayList<Node> possible_moves = new ArrayList<Node>();
-        for (int i = curr.x-2; i <= curr.x+2; i++) {
-            for (int j = curr.y-2; j <= curr.y+2; j++) {
-                if (i < 0 || j < 0 || i >= this.numRows || j >= this.numCols) {
-                    continue;
-                }
-                else {
-                    Point next = new Point(i, j);
-                    String val = this.pingMap(next);
-                    Node n = new Node(val, next);
-                    subgrid[i-minx][j-miny] = n;
-                }
-
-            }
-        }
-        return subgrid;
-    }
-
     public void travelToDestination() {
 
         if (this.is_uncertian) {
-            System.out.println("Run uncertian Pathfinder");
+            System.out.println("Run uncertain Pathfinder");
             this.run_random_trace();
         }
 
         else {
-            System.out.println("Run the certian pathfinder");
+            System.out.println("Run the certain pathfinder");
             ArrayList<Node> graph = this.construct_graph();
             Node start = null;
             Node end = null;
@@ -332,44 +269,6 @@ public class uncertainRobot extends Robot {
         return graph;
     }
 
-    public ArrayList<Node> construct_subgraph(Node[][] temp) {
-        ArrayList<Node> graph = new ArrayList<Node>();
-        int rows = temp.length - 1;
-        int cols = temp[0].length - 1;
-        for (int i = 0; i <= rows; i++) {
-            for (int j = 0; j <= cols; j++) {
-                Node n = temp[i][j];
-                if (n == null) {
-                    System.out.print(rows);
-                    System.out.println(cols);
-                    System.out.print("N was null you dummy : ");
-                    System.out.print(i);
-                    System.out.println(j);
-                    continue;
-                }
-                if (( j - 1) >= 0) {
-                    // the position to the left
-                    if (temp[i][j-1] != null) n.add_neighbor(temp[i][j-1]);
-                }
-                if ((i - 1) >= 0) {
-                    // the position to the top
-                    if (temp[i-1][j] != null) n.add_neighbor(temp[i-1][j]);
-                }
-                if ((( j + 1) <= cols) && ((i - 1) >= 0)){
-                    // position to the top right
-                    if (temp[i-1][j+1] != null) n.add_neighbor(temp[i-1][j+1]);
-                }
-                if (((i - 1) >= 0) && (( j - 1) >= 0)) {
-                    // position to the top left
-                    if (temp[i-1][j-1] != null) n.add_neighbor(temp[i-1][j-1]);
-                }
-                graph.add(n);
-            }
-        }
-
-        return graph;
-    }
-
     public void execute_moves (ArrayList<Node> path) {
         // once a path has been determined, mosey down the path
         // Method assumes path is backwards (i.e index of 'F' is 0, index of 'S' is path.size() -1)
@@ -377,8 +276,6 @@ public class uncertainRobot extends Robot {
         for (int i = len; i >= 0; i--) {
 
             Point pt = path.get(i).get_position();
-            System.out.print("Moved: ");
-            System.out.println(pt);
             this.move(pt);
         }
     }

@@ -1,3 +1,7 @@
+/*
+runs a better, statistically motivated approach to deal with uncertainty
+ */
+
 package src;
 
 import world.Robot;
@@ -6,7 +10,6 @@ import java.awt.Point;
 import java.lang.Integer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Stack;
 
 
 public class uncertainRobot2 extends Robot {
@@ -15,7 +18,6 @@ public class uncertainRobot2 extends Robot {
     private  int numCols;
     private Point endPos;
     private boolean is_uncertian;
-    private Stack<Node> stack;
     private Node[][] grid;
     private int max_number_of_moves;
 
@@ -25,7 +27,6 @@ public class uncertainRobot2 extends Robot {
         this.numCols = numCols;
         this.endPos = endPos;
         this.is_uncertian = uncert_flag;
-        this.stack = new Stack<Node>();
         this.grid = new Node[this.numRows][this.numCols];
         this.max_number_of_moves = this.get_max_moves();
     }
@@ -33,13 +34,6 @@ public class uncertainRobot2 extends Robot {
     public int get_max_moves() {
         int ceil = this.numRows*this.numCols;
         return (ceil > 20) ? ceil*2 : 20;
-    }
-
-    public void run_random_trace() {
-        this.init_grid();
-        while (!this.getPosition().equals(this.endPos) && this.getNumMoves() < this.max_number_of_moves) {
-            this.move_towards_destination();
-        }
     }
 
     public void run_layered_trace() {
@@ -88,90 +82,6 @@ public class uncertainRobot2 extends Robot {
         this.grid[this.endPos.x][this.endPos.y] = new Node("F", this.endPos);
     }
 
-    public void move_towards_destination() {
-        /*
-        ping around 1 layer
-        find next closest cell
-        move there
-        if position did not change
-        this.move_ccw_or_cw()
-         */
-
-        ArrayList<Node> possible_moves = this.ping_layer();
-        Node end = new Node("O", this.endPos);
-
-        Point current_pos = this.getPosition();
-
-        while (this.getPosition().equals(current_pos)) {
-            Node next_move = this.get_next(possible_moves);
-            if (next_move == null) {
-                return;
-            }
-            Point next = next_move.get_position();
-            Node grid_node = this.grid[next.x][next.y];
-            if (grid_node != null && grid_node.get_symbol().equals("X")) {
-                possible_moves.remove(next_move);
-                continue;
-            } else {
-                this.move(next_move.get_position());
-            }
-
-            if (this.getPosition().equals(current_pos)) {   // Hit an obstacle
-                this.grid[this.getX()][this.getY()] = new Node("X", next_move.get_position());
-                possible_moves.remove(next_move);
-            } else {
-                this.grid[this.getX()][this.getY()] = new Node("O", next_move.get_position());
-                System.out.print("Moved To: ");
-                System.out.println(next_move.get_position());
-                if (Node.manhattan_distance(end, next_move) > Node.manhattan_distance(end, new Node("",current_pos))) {
-                    System.out.println("moved farther away");
-                    this.grid[this.getX()][this.getY()] = new Node("X", current_pos);
-                }
-            }
-            if (this.endPos.equals(this.getPosition())) {
-                return;
-            }
-        }
-    }
-
-    public Node get_next(ArrayList<Node> possible_moves) {
-        Node end = new Node("O", this.endPos);
-
-        if (!possible_moves.isEmpty()) {
-
-            Node next_move = possible_moves.get(0);
-
-            for (int i = 1; i < possible_moves.size(); i++) {
-                if (Node.manhattan_distance(end, possible_moves.get(i)) < Node.manhattan_distance(end, next_move)) {
-                    next_move = possible_moves.get(i);
-                }
-            }
-            return next_move;
-        }
-        return null;
-    }
-
-    public ArrayList<Node> ping_layer() {
-        Point curr = this.getPosition();
-        ArrayList<Node> possible_moves = new ArrayList<Node>();
-        for (int i = curr.x-1; i <= curr.x+1; i++) {
-            for (int j = curr.y-1; j <= curr.y+1; j++) {
-                if (i < 0 || j < 0 || i >= this.numRows || j >= this.numCols) {
-                    continue;
-                }
-                else if (i == curr.x && j == curr.y) {
-                    continue;
-                }
-                else {
-                    Point next = new Point(i, j);
-                    String val = this.pingMap(next);
-                    possible_moves.add(new Node(val, next));
-                }
-
-            }
-        }
-        return possible_moves;
-    }
 
     public Node[][] ping_layer_radius(int r /* r stands for radius =) */) {
         Point curr = this.getPosition();
@@ -204,13 +114,12 @@ public class uncertainRobot2 extends Robot {
     public void travelToDestination() {
 
         if (this.is_uncertian) {
-            System.out.println("Run uncertian Pathfinder");
-//            this.run_random_trace();
+            System.out.println("Run Uncertain Pathfinder");
             this.run_layered_trace();
         }
 
         else {
-            System.out.println("Run the certian pathfinder");
+            System.out.println("Run the certain pathfinder");
             ArrayList<Node> graph = this.construct_graph();
             Node start = null;
             Node end = null;
