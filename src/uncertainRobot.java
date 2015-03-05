@@ -52,13 +52,6 @@ public class uncertainRobot extends Robot {
     }
 
     public void move_towards_destination() {
-        /*
-        ping around 1 layer
-        find next closest cell
-        move there
-        if position did not change
-        this.move_ccw_or_cw()
-         */
 
         ArrayList<Node> possible_moves = this.ping_layer();
         Node end = new Node("O", this.endPos);
@@ -118,6 +111,7 @@ public class uncertainRobot extends Robot {
     }
 
     public ArrayList<Node> ping_layer() {
+        // Does not actually ping
         Point curr = this.getPosition();
         ArrayList<Node> possible_moves = new ArrayList<Node>();
         for (int i = curr.x-1; i <= curr.x+1; i++) {
@@ -130,8 +124,8 @@ public class uncertainRobot extends Robot {
                 }
                 else {
                     Point next = new Point(i, j);
-                    String val = this.pingMap(next);
-                    possible_moves.add(new Node(val, next));
+                    //String val = this.pingMap(next);
+                    possible_moves.add(new Node("", next));
                 }
             }
         }
@@ -284,11 +278,13 @@ public class uncertainRobot extends Robot {
 
         try {
 
-            World myWorld = new World("maps/L_map.txt", true);
+            World myWorld = new World("maps/L_map.txt", false);
 
-            src.uncertainRobot2 robo = new src.uncertainRobot2(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), true);
+            src.uncertainRobot2 robo = new uncertainRobot2(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), false);
 
             robo.addToWorld(myWorld);
+
+            robo.travelToDestination();
 
             robo.travelToDestination();
 
