@@ -133,11 +133,11 @@ public class uncertainRobot extends Robot {
                     String val = this.pingMap(next);
                     possible_moves.add(new Node(val, next));
                 }
-
             }
         }
         return possible_moves;
     }
+
 
     public void travelToDestination() {
 
@@ -164,7 +164,7 @@ public class uncertainRobot extends Robot {
             ArrayList<Node> path = this.run_a_star(start, end);
             System.out.println("just for a breakpoint");
             if (path == null) {
-                System.out.println("we did something dumbbbb");
+                ;
             }
             else {
                 this.execute_moves(path);
@@ -273,8 +273,8 @@ public class uncertainRobot extends Robot {
         // once a path has been determined, mosey down the path
         // Method assumes path is backwards (i.e index of 'F' is 0, index of 'S' is path.size() -1)
         int len = path.size()-2;
-        for (int i = len; i >= 0; i--) {
 
+        for (int i = len; i >= 0; i--) {
             Point pt = path.get(i).get_position();
             this.move(pt);
         }
@@ -284,7 +284,7 @@ public class uncertainRobot extends Robot {
 
         try {
 
-            World myWorld = new World("maps/map2.txt", false);
+            World myWorld = new World("maps/L_map.txt", true);
 
             src.uncertainRobot2 robo = new src.uncertainRobot2(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), true);
 

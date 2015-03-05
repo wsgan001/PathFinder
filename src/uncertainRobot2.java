@@ -61,7 +61,7 @@ public class uncertainRobot2 extends Robot {
             Node fake_end = new Node("", this.endPos);
             int current_shortest_distance = Node.manhattan_distance(start, fake_end);
             for (int i = 0; i < subgraph.size(); i++) {
-                if (subgraph.get(i).get_symbol().equals("O") || subgraph.get(i).get_symbol().equals("F")) {
+                if (subgraph.get(i).get_symbol().equals("O") || subgraph.get(i).get_symbol().equals("F") || subgraph.get(i).get_symbol().equals("S")) {
                     if (current_shortest_distance > Node.manhattan_distance(subgraph.get(i), fake_end)) {
                         current_shortest_distance = Node.manhattan_distance(subgraph.get(i), fake_end);
                         end = subgraph.get(i);
@@ -70,7 +70,7 @@ public class uncertainRobot2 extends Robot {
             }
 
             path = run_a_star(start, end);
-            radius += 2;
+            radius += 1;
         } while (path == null);
 
         this.execute_moves(path);
@@ -101,7 +101,7 @@ public class uncertainRobot2 extends Robot {
                 }
                 else {
                     Point next = new Point(i, j);
-                    String val = this.pingMap(next);
+                    String val = this.determine_value(next, 1);
                     Node n = new Node(val, next);
                     subgrid[i-minx][j-miny] = n;
                 }
@@ -109,6 +109,25 @@ public class uncertainRobot2 extends Robot {
             }
         }
         return subgrid;
+    }
+
+    public String determine_value(Point target, int multiplier) {
+        if (this.grid[target.x][target.y] != null) {
+            return this.grid[target.x][target.y].get_symbol();
+        } else {
+            String val;
+            int count = 0;
+            Point current = this.getPosition();
+            int distance = (int) Math.floor(Point.distance(target.x, target.y, current.x, current.y));
+            int trys = distance * multiplier;
+            for (int i = 0; i <= trys; i++) {
+                val = this.pingMap(target);
+                if (val.equals("X")) count--;
+                else count++;
+            }
+            if (count <= 0) return "X";
+            else return "O";
+        }
     }
 
     public void travelToDestination() {
@@ -247,14 +266,6 @@ public class uncertainRobot2 extends Robot {
         for (int i = 0; i <= rows; i++) {
             for (int j = 0; j <= cols; j++) {
                 Node n = temp[i][j];
-                if (n == null) {
-                    System.out.print(rows);
-                    System.out.println(cols);
-                    System.out.print("N was null you dummy : ");
-                    System.out.print(i);
-                    System.out.println(j);
-                    continue;
-                }
                 if (( j - 1) >= 0) {
                     // the position to the left
                     if (temp[i][j-1] != null) n.add_neighbor(temp[i][j-1]);
@@ -282,12 +293,22 @@ public class uncertainRobot2 extends Robot {
         // once a path has been determined, mosey down the path
         // Method assumes path is backwards (i.e index of 'F' is 0, index of 'S' is path.size() -1)
         int len = path.size()-2;
+        Point last_position = this.getPosition();
         for (int i = len; i >= 0; i--) {
-
             Point pt = path.get(i).get_position();
-            System.out.print("Moved: ");
+            System.out.print("Trying to move to: ");
             System.out.println(pt);
             this.move(pt);
+            // in case you cannot move anymore, stop moving
+            if (last_position.equals(this.getPosition())) {
+                System.out.println("Hit an X =(");
+                this.grid[pt.x][pt.y] = new Node("X", pt);
+                break;
+            }
+            else {
+                this.grid[this.getX()][this.getY()] = new Node("O", this.getPosition());
+                last_position = this.getPosition();
+            }
         }
     }
 
@@ -295,7 +316,7 @@ public class uncertainRobot2 extends Robot {
 
         try {
 
-            World myWorld = new World("maps/L_map.txt", false);
+            World myWorld = new World("maps/L_map.txt", true);
 
             src.uncertainRobot2 robo = new src.uncertainRobot2(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), true);
 
