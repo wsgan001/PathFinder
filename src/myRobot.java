@@ -140,7 +140,8 @@ public class myRobot extends Robot {
                     // the position to the left
                     if (temp[i-1][j] != null) n.add_neighbor(temp[i-1][j]);
                 }
-                if ((( j + 1) < this.numRows) && ((i - 1) >= 0)){
+                // ERROR was here! originally had this.numRows instead of .numCols
+                if ((( j + 1) < this.numCols) && ((i - 1) >= 0)){
                     // position to the top left
                     if (temp[i-1][j+1] != null) n.add_neighbor(temp[i-1][j+1]);
                 }

@@ -45,7 +45,7 @@ public class uncertainRobot2 extends Robot {
 
     public void move_towards_destination_layered() {
 
-        int radius = 2;
+        int radius = 6;
         ArrayList<Node> path = null;
         do {
             Node[][] subgrid = this.ping_layer_radius(radius);
@@ -101,7 +101,7 @@ public class uncertainRobot2 extends Robot {
                 }
                 else {
                     Point next = new Point(i, j);
-                    String val = this.determine_value(next, 1);
+                    String val = this.determine_value(next, 3);
                     Node n = new Node(val, next);
                     subgrid[i-minx][j-miny] = n;
                 }
@@ -236,6 +236,7 @@ public class uncertainRobot2 extends Robot {
                 String current_obj = this.pingMap(pt);
                 Node n = new Node(current_obj, pt);
                 temp[i][j] = n;
+
                 if (( j - 1) >= 0) {
                     // the position to the top
                     if (temp[i][j-1] != null) n.add_neighbor(temp[i][j-1]);
@@ -244,7 +245,8 @@ public class uncertainRobot2 extends Robot {
                     // the position to the left
                     if (temp[i-1][j] != null) n.add_neighbor(temp[i-1][j]);
                 }
-                if ((( j + 1) < this.numRows) && ((i - 1) >= 0)){
+                // ERROR was here! originally had this.numRows instead of .numCols
+                if ((( j + 1) < this.numCols) && ((i - 1) >= 0)){
                     // position to the top left
                     if (temp[i-1][j+1] != null) n.add_neighbor(temp[i-1][j+1]);
                 }
@@ -316,9 +318,9 @@ public class uncertainRobot2 extends Robot {
 
         try {
 
-            World myWorld = new World("maps/L_map.txt", true);
+            World myWorld = new World("maps/myInputFile10.txt", false);
 
-            src.uncertainRobot2 robo = new src.uncertainRobot2(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), true);
+            src.uncertainRobot2 robo = new src.uncertainRobot2(myWorld.numCols(), myWorld.numRows(), myWorld.getEndPos(), false);
 
             robo.addToWorld(myWorld);
 
